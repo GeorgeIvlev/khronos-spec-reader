@@ -1,0 +1,39 @@
+html, body {
+  padding: 0;
+  margin: 0;
+}
+
+.header {
+  grid-area: header;
+  background-color: chocolate;
+}
+
+.sidebar {
+  grid-area: sidebar;
+  background-color: dimgray;
+}
+
+.content {
+  grid-area: content;
+  padding: 8px;
+
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
+
+.footer {
+  grid-area: footer;
+  background-color: slategrey;
+}
+
+.container {
+  display: grid;
+
+  height: 100%;
+  width: 100%;
+
+  /*grid-template-rows: 10vh 80vh 10vh;*/
+  /*grid-template-columns: 200px 1fr;*/
+
+  /*grid-template-areas: "header header header" "sidebar content content" "footer footer footer";*/
+}
