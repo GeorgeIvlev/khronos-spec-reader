@@ -1,5 +1,7 @@
-import { useEffect, useState } from 'react';
+import {useCallback, useEffect, useState} from 'react';
 import { invoke } from '@tauri-apps/api/core';
+
+import debounce from 'lodash/debounce';
 // import { fetch } from '@tauri-apps/plugin-http';
 // import { exists, writeTextFile, readTextFile, BaseDirectory } from '@tauri-apps/plugin-fs';
 // import reactLogo from "./assets/react.svg";
@@ -28,7 +30,7 @@ function App() {
     //
     useEffect(() => {
         (async () => {
-            const result = await invoke('invokeMyAss');
+            const result = await invoke('search_keyword', { keyword: 'glGenBuffers' });
             console.log("RESULT: ", result)
     //         const cacheExists = await exists('cache.xml', { baseDir: BaseDirectory.Home });
     //
@@ -49,14 +51,21 @@ function App() {
         })();
     }, [])
 
-  return (
-      <div className="flex items-center space-x-2 text-base">
-          <div className="header">Header XXX</div>
-          <div className="content" dangerouslySetInnerHTML={{__html: state}}></div>
-          <div className="sidebar">Sidebar</div>
-          <div className="footer">Footer</div>
-      </div>
-  );
+    const onSearchString = useCallback(async (event) => {
+        const result = await invoke('search_keyword', { keyword: event.target.value });
+        console.log("ON SEARCH!", result, event.target.value)
+    }, []);
+
+    return (
+        <div className="flex items-center space-x-2 text-base">
+            <div className="header">
+                <input onChange={debounce(onSearchString, 400)} />
+            </div>
+            <div className="content" dangerouslySetInnerHTML={{__html: state}}></div>
+            <div className="sidebar">Sidebar</div>
+            <div className="footer">Footer</div>
+        </div>
+    );
 }
 
 export default App;
