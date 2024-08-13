@@ -28,7 +28,7 @@ function App() {
     //
     useEffect(() => {
         (async () => {
-            const result = await invoke('greet', { name: "nigg" });
+            const result = await invoke('invokeMyAss');
             console.log("RESULT: ", result)
     //         const cacheExists = await exists('cache.xml', { baseDir: BaseDirectory.Home });
     //
