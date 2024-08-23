@@ -1,13 +1,52 @@
-import {useCallback, useEffect, useState} from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 
+import { Col, Button, Layout } from 'antd';
+
 import debounce from 'lodash/debounce';
+
+const { Header, Footer, Sider, Content } = Layout;
+
+const headerStyle: React.CSSProperties = {
+    textAlign: 'center',
+    color: '#fff',
+    height: 64,
+    paddingInline: 48,
+    backgroundColor: '#4096ff',
+};
+
+const contentStyle: React.CSSProperties = {
+    textAlign: 'center',
+    minHeight: 120,
+    lineHeight: '120px',
+    color: '#fff',
+    backgroundColor: '#0958d9',
+};
+
+const siderStyle: React.CSSProperties = {
+    textAlign: 'center',
+    lineHeight: '120px',
+    color: '#fff',
+    backgroundColor: '#1677ff',
+};
+
+const footerStyle: React.CSSProperties = {
+    textAlign: 'center',
+    color: '#fff',
+    backgroundColor: '#4096ff',
+};
+
+const layoutStyle = {
+    overflow: 'hidden',
+    height: '100%'
+};
+
 // import { fetch } from '@tauri-apps/plugin-http';
 // import { exists, writeTextFile, readTextFile, BaseDirectory } from '@tauri-apps/plugin-fs';
 // import reactLogo from "./assets/react.svg";
 // import { invoke } from "@tauri-apps/api/core";
-import './output.css';
 import './App.css';
+import CommandList from "@/components/commandList.tsx";
 
 // import { Command } from '@tauri-apps/plugin-shell';
 // when using `"withGlobalTauri": true`, you may use
@@ -30,8 +69,12 @@ function App() {
     //
     useEffect(() => {
         (async () => {
-            const result = await invoke('search_keyword', { keyword: 'glGenBuffers' });
-            console.log("RESULT: ", result)
+            // const result = await invoke('invokeMyAss');
+            // console.log("RESULT: ", result)
+
+            const commands = await invoke('get_all_commands');
+            console.log(commands);
+
     //         const cacheExists = await exists('cache.xml', { baseDir: BaseDirectory.Home });
     //
     //         if (!cacheExists) {
@@ -56,15 +99,32 @@ function App() {
         console.log("ON SEARCH!", result, event.target.value)
     }, []);
 
+    {/*<div className="content" dangerouslySetInnerHTML={{__html: state}}></div>*/}
+
     return (
-        <div className="flex items-center space-x-2 text-base">
-            <div className="header">
-                <input onChange={debounce(onSearchString, 400)} />
-            </div>
-            <div className="content" dangerouslySetInnerHTML={{__html: state}}></div>
-            <div className="sidebar">Sidebar</div>
-            <div className="footer">Footer</div>
-        </div>
+        <>
+            {/*<Col className="gutter-row">*/}
+            {/*    Header*/}
+            {/*</Col>*/}
+            {/*<Col className="gutter-row">*/}
+            {/*    <Button type="primary">Button</Button>*/}
+            {/*    <div>search_keyword</div>*/}
+            {/*    <input onChange={debounce(onSearchString, 400)}/>*/}
+            {/*</Col>*/}
+            {/*<Col className="gutter-row">Footer</Col>*/}
+            <Layout style={layoutStyle}>
+                <Sider width="25%" style={siderStyle}>
+                    Sider
+                </Sider>
+                <Layout>
+                    <Header style={headerStyle}>Header</Header>
+                    <Content style={contentStyle}>
+                        <CommandList />
+                    </Content>
+                    <Footer style={footerStyle}>Footer</Footer>
+                </Layout>
+            </Layout>
+        </>
     );
 }
 
