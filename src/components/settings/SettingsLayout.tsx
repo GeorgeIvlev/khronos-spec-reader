@@ -15,6 +15,10 @@ const SettingsLayout = () => {
     ['git', 'cmake', 'python3', 'meson', 'clang', 'clang++'].forEach(
       async (app) => {
         await execCommand(`command -v ${app}`, (event) => {
+          console.log(`Checking for ${app}...`);
+          if (event.event === 'stderr') {
+            console.log(`${app} stderr: ${event.data}`);
+          }
           if (event.event === 'stdout') {
             console.log(app);
             appsMapping.set(app, event.data.trim());

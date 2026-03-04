@@ -24,3 +24,11 @@ html, body {
     flex: 1;
     overflow: auto;
 }
+
+@font-face {
+    font-family: 'Agave';
+    src: url('./public/Agave-Regular.ttf') format('truetype');
+}
+
+// './public/FragmentMono-Regular.ttf'
+// './public/LythMono-Medium.ttf'
