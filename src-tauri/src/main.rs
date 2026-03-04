@@ -200,8 +200,17 @@ async fn stream_file_content(window: Window, path: String) -> Result<(), String>
 #[tauri::command]
 async fn exec_command(command: String, channel: Channel<CommandEvent>) -> Result<(), String> {
     // Spawn command with piped stdout/stderr
+    #[cfg(target_os = "windows")]
     let mut child = Command::new("cmd")
         .args(&["/C", &command])
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
+        .map_err(|e| format!("Failed to spawn: {}", e))?;
+
+    #[cfg(not(target_os = "windows"))]
+    let mut child = Command::new("sh")
+        .args(&["-c", &command])
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
         .spawn()
