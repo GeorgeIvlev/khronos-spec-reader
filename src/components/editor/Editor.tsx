@@ -6,13 +6,14 @@ import 'ace-builds/src-noconflict/theme-chrome';
 import 'ace-builds/src-noconflict/mode-c_cpp';
 import 'ace-builds/src-noconflict/keybinding-vim';
 
+import { processShortcuts } from './shortcuts';
+
 ace.config.set('basePath', '/');
 
 const Editor = () => {
   useLayoutEffect(() => {
     let editor = ace.edit('editor-element-id');
     editor.session.setUseWorker(true);
-    editor.setKeyboardHandler('ace/keyboard/vim');
     // editor.setKeyboardHandler("ace/keyboard/emacs");
     // editor.setKeyboardHandler(null); // Back to default
     // Default options
@@ -32,7 +33,52 @@ const Editor = () => {
       useSoftTabs: true,
     });
 
+    editor.setKeyboardHandler('ace/keyboard/vim');
+
+    var VimApi = ace.require('ace/keyboard/vim').Vim;
+
+    console.log('VimApi:', VimApi);
+
+    VimApi.defineEx('write', 'w', function (cm, input) {
+      console.log(':w triggered!', input);
+
+      // Get editor content
+      const content = editor.getValue();
+      const filePath = (window as any).__CURRENT_FILE_PATH__ || 'untitled';
+
+      // Your save logic here
+      console.log('Saving file:', filePath);
+      console.log('Content:', content);
+      console.log('Content length:', content.length);
+    });
+    VimApi.defineEx('mycommand', 'my', function (cm, input) {
+      console.log('My command!');
+    });
+
+    // ace.config.loadModule('ace/keybinding/vim', function () {
+    //   const Vim = ace.require('ace/keyboard/vim').Vim;
+    //   Vim.map(':w', 'javascript:myCustomSaveFunction()', 'normal');
+
+    //   // CORRECT: Define Ex command :w and :write
+    //   Vim.defineEx('write', 'w', function (cm: any, input: any) {
+    //     console.log(':w triggered!', input);
+
+    //     // Call Tauri or your save function
+    //     // saveFile(filePath, content);
+
+    //     // Show success in Vim command line
+    //     cm.openNotification(`"${filePath}" ${content.length}L written`, {
+    //       bottom: true,
+    //       duration: 3000,
+    //     });
+    //   });
+
+    //   // Optional: Map Ctrl+S to :w in normal mode
+    //   Vim.map('<C-s>', ':w<CR>', 'normal');
+    // });
+
     editor.focus();
+    processShortcuts(editor);
   });
 
   return <div id="editor-element-id"></div>;

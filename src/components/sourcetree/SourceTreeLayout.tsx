@@ -1,17 +1,66 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 import { execCommand } from '../../services/CommandManager';
 
+import Timeline from './timeline';
+
+import './index.scss';
+
+const getAllTags = async () => {
+  const tags: string[] = [];
+
+  await execCommand(`git --no-pager tag`, (event) => {
+    if (event.event === 'finished') {
+      console.log('Finished fetching tags');
+      return;
+    }
+
+    if (event.event === 'stdout') {
+      const tag = event.data;
+      console.log('TAG: ', tag);
+      if (tag) {
+        tags.push(tag);
+      }
+    }
+  });
+
+  return tags;
+};
+
 const SourceTreeLayout = () => {
+  const [commits, setCommits] = useState([]);
   useEffect(() => {
-    execCommand(`git log --pretty=format:'{"commit":"%H"}'`, (event) => {
-      console.log('Source Tree:', event.data);
-    });
+    const commitsList: string[] = [];
+
+    (async () => {
+      const tags = await getAllTags();
+      console.log(tags);
+
+      await execCommand(
+        `git log --pretty=format:'{"commit":"%H"}'`,
+        (event) => {
+          if (event.event === 'finished') {
+            setCommits(commitsList);
+            return;
+          }
+
+          commitsList.push(event.data);
+        },
+      );
+    })();
   }, []);
 
   return (
-    <div>
-      <h1>Source Tree</h1>
+    <div className="source-tree-layout">
+      <div>
+        <div>
+          <label>Tags:</label>
+          <div></div>
+        </div>
+      </div>
+      <div>
+        <Timeline data={commits} />
+      </div>
     </div>
   );
 };
