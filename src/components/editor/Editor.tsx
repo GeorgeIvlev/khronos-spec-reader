@@ -7,6 +7,8 @@ import 'ace-builds/src-noconflict/mode-c_cpp';
 import 'ace-builds/src-noconflict/keybinding-vim';
 
 import { processShortcuts } from './shortcuts';
+import '../../services/FileSystemManager';
+import EventManager from '../../services/EventManager';
 
 ace.config.set('basePath', '/');
 
@@ -38,6 +40,11 @@ const Editor = () => {
     var VimApi = ace.require('ace/keyboard/vim').Vim;
 
     console.log('VimApi:', VimApi);
+
+    VimApi.defineEx('open', 'o', function (cm, input) {
+      console.log(':o triggered!', input.args);
+      EventManager.emit('open-file', input.args[0]);
+    });
 
     VimApi.defineEx('write', 'w', function (cm, input) {
       console.log(':w triggered!', input);

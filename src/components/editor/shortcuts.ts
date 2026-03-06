@@ -7,6 +7,7 @@
 //         return true; // Return true to signal the command was handled
 //     }
 // });
+import EventManager from '../../services/EventManager';
 
 export const processShortcuts = (editor) => {
   editor.commands.addCommand({
@@ -31,6 +32,7 @@ export const processShortcuts = (editor) => {
     bindKey: { win: 'Ctrl-F', mac: 'Command-F' },
     exec: function (editor) {
       console.log('Find file shortcut triggered');
+      EventManager.emit('file-search');
       return true;
     },
   });

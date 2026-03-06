@@ -15,6 +15,7 @@ import StatusBar from './components/status-bar/StatusBar';
 import ShortcutManager from './services/ShortcutManager';
 import SettingsLayout from './components/settings/SettingsLayout';
 import SourceTreeLayout from './components/sourcetree/SourceTreeLayout';
+import FileSearch from './components/editor/FileSearch';
 // ShortcutManager.addShortcut('Ctrl+Tab', () => {
 //     console.log("Hello tab!");
 // })'
@@ -35,7 +36,12 @@ const router = createBrowserRouter([
     children: [
       {
         index: true, // This makes Home the default child of the root path
-        element: <Editor />,
+        element: (
+          <div className="h-100">
+            <Editor />
+            <FileSearch />
+          </div>
+        ),
       },
       {
         path: 'sourcetree',
