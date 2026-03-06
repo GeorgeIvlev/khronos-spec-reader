@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Portal, Input } from '@mantine/core';
 import { useDebouncedCallback } from '@mantine/hooks';
 
-import EventManager from '../../services/EventManager';
+import { EventManager } from '../../services/EventManager';
 
 import './file-search.scss';
 import { execCommand } from '../../services/CommandManager';
@@ -81,3 +81,23 @@ const FileSearch = () => {
 };
 
 export default FileSearch;
+
+/**
+ * maximum depth:
+ *  fd -d 2
+ *
+ * search by size:
+ *  fd --size +100M
+ *  fd -S 10K
+ */
+
+// TODO: Can make \f or \d for file or directory search
+// -t f	search only files
+// -t d	search only directories
+// -t l	symbolic links
+// -t x	executable files
+// -t e	empty files
+// -t s	sockets
+
+// Command+Shift+F - search content in files with ripgrep
+// Command+F - search for files

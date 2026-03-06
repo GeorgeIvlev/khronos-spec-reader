@@ -1,4 +1,4 @@
-import { useLayoutEffect } from 'react';
+import { useEffect, useLayoutEffect } from 'react';
 
 import * as ace from 'ace-builds';
 // Import theme and mode (required)
@@ -8,7 +8,7 @@ import 'ace-builds/src-noconflict/keybinding-vim';
 
 import { processShortcuts } from './shortcuts';
 import '../../services/FileSystemManager';
-import EventManager from '../../services/EventManager';
+import { EventManager } from '../../services/EventManager';
 
 ace.config.set('basePath', '/');
 
@@ -87,6 +87,12 @@ const Editor = () => {
     editor.focus();
     processShortcuts(editor);
   });
+
+  useEffect(() => {
+    return () => {
+      // EventManager.off('open-file');
+    };
+  }, []);
 
   return <div id="editor-element-id"></div>;
 };

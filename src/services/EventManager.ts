@@ -1,5 +1,12 @@
-class EventManager {
+export class EventManager {
   private events: { [key: string]: Function[] } = {};
+
+  private static instance: EventManager;
+
+  static {
+    console.log('EventManager static initializer');
+    EventManager.instance = new EventManager();
+  }
 
   on(eventName: string, callback: Function) {
     if (!this.events[eventName]) {
@@ -37,6 +44,3 @@ class EventManager {
     return this.on(eventName, onceWrapper);
   }
 }
-
-const EventManagerInstance = new EventManager();
-export default EventManagerInstance;

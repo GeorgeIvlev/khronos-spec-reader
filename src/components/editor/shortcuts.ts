@@ -7,7 +7,7 @@
 //         return true; // Return true to signal the command was handled
 //     }
 // });
-import EventManager from '../../services/EventManager';
+import { EventManager } from '../../services/EventManager';
 
 export const processShortcuts = (editor) => {
   editor.commands.addCommand({
@@ -27,12 +27,24 @@ export const processShortcuts = (editor) => {
     },
   });
 
+  /**
+   * @summary Search for files in specific directory
+   */
   editor.commands.addCommand({
     name: 'findFile',
     bindKey: { win: 'Ctrl-F', mac: 'Command-F' },
     exec: function (editor) {
       console.log('Find file shortcut triggered');
       EventManager.emit('file-search');
+      return true;
+    },
+  });
+  editor.commands.addCommand({
+    name: 'findContentInFile',
+    bindKey: { win: 'Ctrl-Shift-F', mac: 'Command-Shift-F' },
+    exec: function (editor) {
+      console.log('Find content in file shortcut triggered');
+      EventManager.emit('file-content-search');
       return true;
     },
   });
