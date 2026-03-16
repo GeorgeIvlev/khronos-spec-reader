@@ -99,7 +99,7 @@ struct StreamEnd {
 }
 
 #[tauri::command]
-async fn stream_file_content(window: Window, path: String) -> Result<(), String> {
+async fn stream_file_content<R: Runtime>(window: Window<R>, path: String) -> Result<(), String> {
     let path = Path::new(&path);
 
     if !path.is_absolute() || path.components().any(|c| c.as_os_str() == "..") {
