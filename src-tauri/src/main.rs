@@ -254,7 +254,8 @@ async fn exec_command(command: String, channel: Channel<CommandEvent>) -> Result
 }
 
 fn main() {
-    tauri::Builder::default()
+    tauri_runtime_verso::builder()
+    // tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
             exec_command,
             list_directory_contents,
