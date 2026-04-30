@@ -1,28 +1,26 @@
-import { useEffect, useState } from 'react';
-
-import { execCommand } from '../../services/CommandManager';
+// import { useEffect, useState } from 'react'
 
 import Timeline from './timeline';
 
 import './index.scss';
 
-const getAllTags = async () => {
+const getAllTags = () => {
   const tags: string[] = [];
 
-  await execCommand(`git --no-pager tag`, (event) => {
-    if (event.event === 'finished') {
-      console.log('Finished fetching tags');
-      return;
-    }
+  // execCommand(`git --no-pager tag`, (event) => {
+  //   if (event.event === 'finished') {
+  //     console.log('Finished fetching tags');
+  //     return;
+  //   }
 
-    if (event.event === 'stdout') {
-      const tag = event.data;
-      console.log('TAG: ', tag);
-      if (tag) {
-        tags.push(tag);
-      }
-    }
-  });
+  //   if (event.event === 'stdout') {
+  //     const tag = event.data;
+  //     console.log('TAG: ', tag);
+  //     if (tag) {
+  //       tags.push(tag);
+  //     }
+  //   }
+  // });
 
   return tags;
 };
@@ -32,21 +30,21 @@ const SourceTreeLayout = () => {
   useEffect(() => {
     const commitsList: string[] = [];
 
-    (async () => {
-      const tags = await getAllTags();
+    (() => {
+      const tags = getAllTags();
       console.log(tags);
 
-      await execCommand(
-        `git log --pretty=format:'{"commit":"%H"}'`,
-        (event) => {
-          if (event.event === 'finished') {
-            setCommits(commitsList);
-            return;
-          }
+      // execCommand(
+      //   `git log --pretty=format:'{"commit":"%H"}'`,
+      //   (event) => {
+      //     if (event.event === 'finished') {
+      //       setCommits(commitsList);
+      //       return;
+      //     }
 
-          commitsList.push(event.data);
-        },
-      );
+      //     commitsList.push(event.data);
+      //   },
+      // );
     })();
   }, []);
 

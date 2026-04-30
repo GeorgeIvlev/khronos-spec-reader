@@ -1,9 +1,11 @@
-const Timeline: React.FC = ({ data }: { data: any[] }) => {
-  const dataToRender = data.map((item, index) => {
-    return <div key={index}>{item}</div>;
-  });
+type Props = { data: string[] }
 
-  return <span>{dataToRender}</span>;
-};
+const Timeline = ({ data }: Props) => {
+  const dataToRender = data.map((item) => {
+    return <div key={item}>{item}</div>
+  })
 
-export default Timeline;
+  return <span>{dataToRender}</span>
+}
+
+export default Timeline

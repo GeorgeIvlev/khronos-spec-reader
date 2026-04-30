@@ -1,26 +1,57 @@
 {
   "compilerOptions": {
+    // --- Module & Output ---
     "jsx": "react-jsx",
-    "esModuleInterop": true,
-    "skipLibCheck": true,
     "target": "ESNext",
-    "allowJs": true,
-    "resolveJsonModule": true,
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
     "moduleDetection": "force",
     "isolatedModules": true,
+    "noEmit": true,
+
+    // --- Libs & Types ---
+    "lib": ["ES2023", "dom", "dom.iterable"],  // ES2023 > ES2022, has Array.findLast etc.
+    "types": ["vite/client"],
+
+    // --- Interop ---
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,      // Implied by esModuleInterop but explicit is safer
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "checkJs": true,                           // If allowJs, actually type-check JS files too
+
+    // --- Strict mode (keep existing + add missing strict checks) ---
     "strict": true,
     "noUncheckedIndexedAccess": true,
-    "moduleResolution": "Bundler",
-    "module": "ESNext",
-    "noEmit": true,
-    "lib": [
-      "es2022",
-      "dom",
-      "dom.iterable",
-    ],
-    "types": [
-      "vite/client",
-    ],
+    "noImplicitOverride": true,                // Must use 'override' keyword on class overrides
+    "noImplicitReturns": true,                 // All code paths in a function must return a value
+    "noFallthroughCasesInSwitch": true,        // Prevent accidental switch fallthrough
+    "noUnusedLocals": true,                    // Error on unused local variables
+    "noUnusedParameters": true,                // Error on unused function parameters
+    "exactOptionalPropertyTypes": true,        // Disallow assigning `undefined` to optional props explicitly
+    "useUnknownInCatchVariables": true,        // catch (e) is `unknown` not `any` (already in strict but explicit)
+
+    // --- Path aliases (mirror your vite.config.ts) ---
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@components/*": ["src/components/*"],
+      "@services/*": ["src/services/*"]
+    },
+
+    // --- Skip checking declaration files of dependencies ---
+    "skipLibCheck": true,
   },
-  "include": ["src"]
+
+  "include": [
+    "src",
+    "vite.config.ts",     // Type-check your config file too
+  ],
+
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/*.test.ts",       // Separate test config is cleaner (see below)
+    "**/*.spec.ts"
+  ]
 }

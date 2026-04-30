@@ -1,30 +1,48 @@
-import { useEffect, useLayoutEffect } from 'react';
+// import { useEffect, useLayoutEffect } from 'react';
 
 import * as ace from 'ace-builds';
-// Import theme and mode (required)
-import 'ace-builds/src-noconflict/theme-chrome';
+
+import 'ace-builds/src-noconflict/theme-gruvbox';
 import 'ace-builds/src-noconflict/mode-c_cpp';
 import 'ace-builds/src-noconflict/keybinding-vim';
 
-import { processShortcuts } from './shortcuts';
-import '../../services/FileSystemManager';
-import { EventManager } from '../../services/EventManager';
+import { processShortcuts, cmakeImplHandle, onOpenHandle, onWriteHandle } from './shortcuts';
+import EventManager from '@services/EventManager';
+import SessionManager from '@components/editor/SessionManager';
+// import ClangdClient from './Lsp'
+
+import './editor.scss';
 
 ace.config.set('basePath', '/');
 
+let editor: ace.Ace.Editor;
+// const clangd = ClangdClient
+
+const sessions = new SessionManager();
+
+function splitPath(path) {
+  // Normalize separators (handle both / and \), remove trailing slashes
+  const normalized = path.replace(/\\/g, '/').replace(/\/+$/, '') || '/';
+  const lastSlash = normalized.lastIndexOf('/');
+
+  if (lastSlash === -1) return { dir: '', file: normalized };
+  if (lastSlash === 0) return { dir: '/', file: normalized.slice(1) };
+
+  return {
+    dir: normalized.slice(0, lastSlash), // "/examples/simple_ui"
+    file: normalized.slice(lastSlash + 1), // "main.cpp"
+  };
+}
+
 const Editor = () => {
   useLayoutEffect(() => {
-    let editor = ace.edit('editor-element-id');
+    editor = ace.edit('editor-element-id');
     editor.session.setUseWorker(true);
-    // editor.setKeyboardHandler("ace/keyboard/emacs");
-    // editor.setKeyboardHandler(null); // Back to default
-    // Default options
     editor.setOptions({
-      theme: 'ace/theme/chrome',
       mode: 'ace/mode/c_cpp',
       fontFamily: 'Agave',
-      fontSize: 15,
-      showPrintMargin: false,
+      fontSize: 16,
+      showPrintMargin: true,
       showGutter: true,
       highlightActiveLine: true,
       enableBasicAutocompletion: false,
@@ -33,68 +51,96 @@ const Editor = () => {
       wrap: true,
       tabSize: 2,
       useSoftTabs: true,
+      readOnly: false,
     });
 
     editor.setKeyboardHandler('ace/keyboard/vim');
-
     var VimApi = ace.require('ace/keyboard/vim').Vim;
 
-    console.log('VimApi:', VimApi);
+    VimApi.defineEx('open', 'o', onOpenHandle);
+    VimApi.defineEx('write', 'w', onWriteHandle);
+    VimApi.defineEx('cmake', '', cmakeImplHandle);
 
-    VimApi.defineEx('open', 'o', function (cm, input) {
-      console.log(':o triggered!', input.args);
-      EventManager.emit('open-file', input.args[0]);
-    });
-
-    VimApi.defineEx('write', 'w', function (cm, input) {
-      console.log(':w triggered!', input);
-
-      // Get editor content
-      const content = editor.getValue();
-      const filePath = (window as any).__CURRENT_FILE_PATH__ || 'untitled';
-
-      // Your save logic here
-      console.log('Saving file:', filePath);
-      console.log('Content:', content);
-      console.log('Content length:', content.length);
-    });
-    VimApi.defineEx('mycommand', 'my', function (cm, input) {
+    VimApi.defineEx('mycommand', 'my', async (cm, input) => {
       console.log('My command!');
+      //       await clangd.send({
+      //         type: 'didOpen',
+      //         uri: 'file:///C:/Users/georg/CLionProjects/test_webview/main.cpp',  // 3 slashes!
+      //         language_id: 'cpp',
+      //         text: `struct B {
+      //     float z;
+      // };
+      // struct A {
+      //     int x;
+      //     int y;
+      //     B z;
+      // };
+      // int main() {
+      //     A v;
+      //     v.x = 0;
+      //     v.
+      //     return 0;
+      // }`
+      //       })
+      // await clangd.send({
+      //   type: 'completion',
+      //   uri: 'file:///C:/Users/georg/CLionProjects/test_webview/main.cpp',  // Same URI!
+      //   line: 13,
+      //   character: 7
+      // });
     });
 
-    // ace.config.loadModule('ace/keybinding/vim', function () {
-    //   const Vim = ace.require('ace/keyboard/vim').Vim;
-    //   Vim.map(':w', 'javascript:myCustomSaveFunction()', 'normal');
-
-    //   // CORRECT: Define Ex command :w and :write
-    //   Vim.defineEx('write', 'w', function (cm: any, input: any) {
-    //     console.log(':w triggered!', input);
-
-    //     // Call Tauri or your save function
-    //     // saveFile(filePath, content);
-
-    //     // Show success in Vim command line
-    //     cm.openNotification(`"${filePath}" ${content.length}L written`, {
-    //       bottom: true,
-    //       duration: 3000,
-    //     });
-    //   });
-
-    //   // Optional: Map Ctrl+S to :w in normal mode
-    //   Vim.map('<C-s>', ':w<CR>', 'normal');
-    // });
-
-    editor.focus();
     processShortcuts(editor);
+    editor.focus();
   });
 
   useEffect(() => {
+    EventManager.on('open-folder-success', (path: string) => {
+      localStorage['current-folder'] = path;
+    });
+
+    EventManager.on('open-file-success', () => {
+      // @ts-ignore
+      const sessionContent = new TextDecoder().decode(window.__FILE_CONTENT__);
+      // @ts-ignore
+      const editorSession = ace.createEditSession(sessionContent, 'ace/mode/c_cpp');
+
+      const { file, dir } = splitPath(window.__FILE_PATH__);
+      console.log(file, dir);
+
+      const session = sessions.createSession(editorSession, file, window.__FILE_PATH__);
+      if (session) {
+        document.getElementById('editor--session-name').innerText = session.filename;
+        editor.setSession(session.editSession);
+        editor.sessionId = session.id;
+      }
+    });
+
+    EventManager.on('editor-change-session', () => {
+      const session = sessions.nextSession();
+      console.log('session: ', session);
+      if (session) {
+        document.getElementById('editor--session-name').innerText = session.filename;
+        editor.setSession(session.editSession);
+        editor.sessionId = session.id;
+      }
+    });
+
     return () => {
-      // EventManager.off('open-file');
+      // clangd.stop();
+      EventManager.off('open-file');
     };
   }, []);
 
-  return <div id="editor-element-id"></div>;
+  return (
+    <>
+      <div id="editor-tabs" className="flex"></div>
+      <div id="editor-element-id"></div>
+      <div className="editor--status_bar">
+        <div id="editor--session-name"></div>
+      </div>
+    </>
+  );
 };
 
 export default Editor;
